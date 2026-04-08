@@ -3,9 +3,22 @@ let addBtn = document.getElementById("addBtn");
 let taskList = document.getElementById("taskList");
 let taskCount = document.getElementById("taskCount");
 
-let tasks = [];
+let clearAllBtn = document.getElementById("clearAllBtn");
+
+let currentFilter = "all";
+
+//Local Storage
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 
 addBtn.addEventListener("click", addTask);
+
+clearAllBtn.addEventListener("click", () => {
+  if (confirm("Are you sure you want to clear all tasks?")){
+tasks = [];
+localStorage.setItem("tasks",JSON.stringify(tasks));
+renderTasks();
+  }
+});
 
 // Add with Enter key
 input.addEventListener("keypress", function(e) {
@@ -25,8 +38,11 @@ function addTask() {
   };
 
   tasks.push(task);
-  input.value = "";
 
+  //Save
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+
+  input.value = "";
   renderTasks();
 }
 
@@ -34,6 +50,10 @@ function renderTasks() {
   taskList.innerHTML = "";
 
   tasks.forEach(task => {
+
+    if (currentFilter === "completed" && !task.completed) return;
+    if (currentFilter === "pending" && task.completed) return;
+
     let li = document.createElement("li");
 
     let span = document.createElement("span");
@@ -46,7 +66,23 @@ function renderTasks() {
     // Toggle complete
     span.onclick = () => {
       task.completed = !task.completed;
+
+      localStorage.setItem("tasks", JSON.stringify(tasks));
       renderTasks();
+    };
+
+    // Edit button
+    let editBtn = document.createElement("button");
+    editBtn.textContent = "Edit";
+
+    editBtn.onclick = () => {
+      let newText = prompt("Edit your task:", task.text);
+      if (newText !== null ) {
+        task.text = newText;
+
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+        renderTasks();
+      }
     };
 
     // Delete button
@@ -55,27 +91,25 @@ function renderTasks() {
 
     delBtn.onclick = () => {
       tasks = tasks.filter(t => t.id !== task.id);
+
+      localStorage.setItem("tasks", JSON.stringify(tasks));
       renderTasks();
     };
 
-    let editBtn = document.createElement("button");
-    editBtn.textContent = "Edit";
-
-    editBtn.onclick = () => {
-      let newText = prompt("Edit your task:", task.text);
-
-      if (newText !== null && newText.trim() !== "") {
-        task.text = newText;
-        renderTasks();
-      }
-    };
-
     li.appendChild(span);
-    li.appendChild(delBtn);
     li.appendChild(editBtn);
+    li.appendChild(delBtn);
 
     taskList.appendChild(li);
   });
 
-    taskCount.textContent = `Total Tasks: ${tasks.length}`;
+    taskCount.textContent = `Tasks: ${tasks.length}`;
 }
+
+function setFilter(filter) {
+  currentFilter = filter;
+  renderTasks();
+}
+
+//Initial load
+renderTasks();
