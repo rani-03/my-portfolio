@@ -51,7 +51,22 @@ li{
     color: gray;
 }
 
+.filters{
+    margin-top: 15px;
+}
+
+.filters button {
+    margin: 5px
+}
+
 button {
    margin-left: 5px;
+}
+
+#clearAllBtn {
+   margin-top: 10px;
+   background: red;
+    color: white;
+    border: none;
 }
 
